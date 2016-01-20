@@ -26,6 +26,7 @@ public class Robot extends IterativeRobot {
     Command autonomousCommand;
     SendableChooser chooser;
 
+    Joystick joyStick;
     Victor leftDriveMotor;
     Victor rightDriveMotor;
     
@@ -39,15 +40,9 @@ public class Robot extends IterativeRobot {
      * This function is run when the robot is first started up and should be
      * used for any initialization code.
      */
-    private void driveMotors() {
-    	leftDriveMotor.set(leftSpeed);
-    	rightDriveMotor.set(rightSpeed);
-    }
-    
-    void tankDrive(double speedLeft, double speedRight) {
-    	leftSpeed = speedLeft;
-    	rightSpeed = speedRight;
-    	driveMotors();
+    private void driveMotors(double speedLeftDM, double speedRightDM) {
+    	leftDriveMotor.set(speedLeftDM);
+    	rightDriveMotor.set(speedRightDM);
     }
     
     public void robotInit() {
@@ -60,6 +55,7 @@ public class Robot extends IterativeRobot {
         //Motor port init
        leftDriveMotor = new Victor(0);
        rightDriveMotor = new Victor(1);
+       joyStick = new Joystick(0);
        
        cycleCounter = 0;
 	/**
@@ -88,7 +84,7 @@ public class Robot extends IterativeRobot {
     public void autonomousInit() {
         autonomousCommand = (Command) chooser.getSelected();
         
-        tankDrive(0,0);
+        driveMotors(0,0);
 		/* String autoSelected = SmartDashboard.getString("Auto Selector", "Default");
 		switch(autoSelected) {
 		case "My Auto":
@@ -110,7 +106,7 @@ public class Robot extends IterativeRobot {
     }
     public void autonomousPeriodic() {
         Scheduler.getInstance().run();
-        tankDrive(1,0);
+        driveMotors(1,0);
         System.out.println("memes");
     }
 
@@ -120,6 +116,7 @@ public class Robot extends IterativeRobot {
         // continue until interrupted by another command, remove
         // this line or comment it out.
         if (autonomousCommand != null) autonomousCommand.cancel();
+        
     }
 
     /**
@@ -127,6 +124,7 @@ public class Robot extends IterativeRobot {
      */
     public void teleopPeriodic() {
         Scheduler.getInstance().run();
+        driveMotors(joyStick.getY(),0);
     }
     
     /**
