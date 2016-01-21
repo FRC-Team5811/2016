@@ -36,6 +36,12 @@ public class Robot extends IterativeRobot {
     double leftSpeed;
     double rightSpeed;
     
+    //COMPRESSOR!!!
+    Compressor compressor;
+    
+    //Limit Switch
+    DigitalInput limitSwitch;
+    
     /**
      * This function is run when the robot is first started up and should be
      * used for any initialization code.
@@ -56,14 +62,22 @@ public class Robot extends IterativeRobot {
        leftDriveMotor = new Victor(0);
        rightDriveMotor = new Victor(1);
        joyStick = new Joystick(0);
-       
+       //set cycle counter
        cycleCounter = 0;
-	/**
-     * This function is called once each time the robot enters Disabled mode.
-     * You can use it to reset any subsystem information you want to clear when
-	 * the robot is disabled.
-     */
+       //compressor port init
+       compressor = new Compressor(0);
+       compressor.setClosedLoopControl(false);
+       //limit switch init
+       limitSwitch =  new DigitalInput(1);
     }
+    
+    public void operatorControl(){
+    	//call if limit switch is used
+    	while(limitSwitch.get()) {
+    		Timer.delay(10);
+    	}
+    }
+    
     public void disabledInit(){
 
     }
@@ -106,8 +120,10 @@ public class Robot extends IterativeRobot {
     }
     public void autonomousPeriodic() {
         Scheduler.getInstance().run();
+       
+        //Drive forward
         driveMotors(1,0);
-        System.out.println("memes");
+        System.out.println("Dank memes");
     }
 
     public void teleopInit() {
@@ -116,7 +132,7 @@ public class Robot extends IterativeRobot {
         // continue until interrupted by another command, remove
         // this line or comment it out.
         if (autonomousCommand != null) autonomousCommand.cancel();
-        
+        compressor.setClosedLoopControl(true);
     }
 
     /**
@@ -124,6 +140,7 @@ public class Robot extends IterativeRobot {
      */
     public void teleopPeriodic() {
         Scheduler.getInstance().run();
+        
         driveMotors(joyStick.getY(),0);
     }
     
@@ -133,7 +150,7 @@ public class Robot extends IterativeRobot {
     public void testPeriodic() {
         LiveWindow.run();
         
-        
+        System.out.println("Trolololol");
         
     }
 }
