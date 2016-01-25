@@ -27,6 +27,7 @@ public class Robot extends IterativeRobot {
     SendableChooser chooser;
 
     Joystick joyStick;
+    Joystick xboxController;
     Victor leftDriveMotor;
     Victor rightDriveMotor;
     
@@ -41,6 +42,10 @@ public class Robot extends IterativeRobot {
     
     //Limit Switch
     DigitalInput limitSwitch;
+    
+    //Button boolean
+    boolean buttonValue;
+    
     
     /**
      * This function is run when the robot is first started up and should be
@@ -62,11 +67,15 @@ public class Robot extends IterativeRobot {
        leftDriveMotor = new Victor(0);
        rightDriveMotor = new Victor(1);
        joyStick = new Joystick(0);
+       xboxController = new Joystick(1);
+       
        //set cycle counter
        cycleCounter = 0;
+       
        //compressor port init
        compressor = new Compressor(0);
        compressor.setClosedLoopControl(false);
+       
        //limit switch init
        limitSwitch =  new DigitalInput(1);
     }
@@ -123,7 +132,6 @@ public class Robot extends IterativeRobot {
        
         //Drive forward
         driveMotors(1,0);
-        System.out.println("Dank memes");
     }
 
     public void teleopInit() {
@@ -134,23 +142,24 @@ public class Robot extends IterativeRobot {
         if (autonomousCommand != null) autonomousCommand.cancel();
         compressor.setClosedLoopControl(true);
     }
-
-    /**
-     * This function is called periodically during operator control
-     */
+    	
     public void teleopPeriodic() {
         Scheduler.getInstance().run();
         
         driveMotors(joyStick.getY(),0);
+        
+         buttonValue = xboxController.getRawButton(1);
+         
+         if (buttonValue = true) {
+        	 driveMotors(1,1);
+         }
     }
     
-    /**
-     * This function is called periodically during test mode
-     */
+    
     public void testPeriodic() {
         LiveWindow.run();
         
-        System.out.println("Trolololol");
+        System.out.println("Aaron this isn't my fault");
         
     }
 }
