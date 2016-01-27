@@ -6,11 +6,12 @@ package org.usfirst.frc.team5811.robot;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
-import org.usfirst.frc.team5811.robot.commands.ExampleCommand;
+//import org.usfirst.frc.team5811.robot.commands.ExampleCommand;
 import org.usfirst.frc.team5811.robot.subsystems.ExampleSubsystem;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.*; 
+import edu.wpi.first.wpilibj.*;
+import edu.wpi.first.wpilibj.buttons.JoystickButton; 
 /**
  * The VM is configured to automatically run this class, and to call the
  * functions corresponding to each mode, as described in the IterativeRobot
@@ -21,15 +22,20 @@ import edu.wpi.first.wpilibj.*;
 public class Robot extends IterativeRobot {
 
 	public static final ExampleSubsystem exampleSubsystem = new ExampleSubsystem();
-	public static OI oi;
+	//public static OI oi;
 
     Command autonomousCommand;
     SendableChooser chooser;
 
-    Joystick joyStick;
-    Joystick xboxController;
-    Victor leftDriveMotor;
-    Victor rightDriveMotor;
+    Joystick joyStickLeft;
+    Joystick joyStickRight;
+    
+    JoystickButton button;
+    
+    Victor frontLeftDriveMotor;
+    Victor frontRightDriveMotor;
+    Victor backLeftDriveMotor;
+    Victor backRightDriveMotor;
     
     int cycleCounter;
     
@@ -52,22 +58,30 @@ public class Robot extends IterativeRobot {
      * used for any initialization code.
      */
     private void driveMotors(double speedLeftDM, double speedRightDM) {
-    	leftDriveMotor.set(speedLeftDM);
-    	rightDriveMotor.set(speedRightDM);
+    	frontLeftDriveMotor.set(speedLeftDM);
+    	frontRightDriveMotor.set(speedRightDM);
+    	backLeftDriveMotor.set(speedLeftDM);
+    	backRightDriveMotor.set(speedRightDM);
     }
     
     public void robotInit() {
-		oi = new OI();
+		//oi = new OI();
         chooser = new SendableChooser();
-        chooser.addDefault("Default Auto", new ExampleCommand());
+        //chooser.addDefault("Default Auto", new ExampleCommand());
 //        chooser.addObject("My Auto", new MyAutoCommand());
         SmartDashboard.putData("Auto mode", chooser);
        
         //Motor port init
-       leftDriveMotor = new Victor(0);
-       rightDriveMotor = new Victor(1);
-       joyStick = new Joystick(0);
-       xboxController = new Joystick(1);
+       frontLeftDriveMotor = new Victor(0);
+       frontRightDriveMotor = new Victor(1);
+       backLeftDriveMotor = new Victor(2);
+       backRightDriveMotor = new Victor(3);
+       
+       joyStickLeft = new Joystick(0);
+       joyStickRight = new Joystick(1);
+       
+       button = new JoystickButton(joyStickLeft, 1);
+       
        
        //set cycle counter
        cycleCounter = 0;
@@ -83,7 +97,7 @@ public class Robot extends IterativeRobot {
     public void operatorControl(){
     	//call if limit switch is used
     	while(limitSwitch.get()) {
-    		Timer.delay(10);
+    		System.out.println("limit switch");
     	}
     }
     
@@ -95,15 +109,7 @@ public class Robot extends IterativeRobot {
 		Scheduler.getInstance().run();
 	}
 
-	/**
-	 * This autonomous (along with the chooser code above) shows how to select between different autonomous modes
-	 * using the dashboard. The sendable chooser code works with the Java SmartDashboard. If you prefer the LabVIEW
-	 * Dashboard, remove all of the chooser code and uncomment the getString code to get the auto name from the text box
-	 * below the Gyro
-	 *
-	 * You can add additional auto modes by adding additional commands to the chooser code above (like the commented example)
-	 * or additional comparisons to the switch structure below with additional strings & commands.
-	 */
+	
     public void autonomousInit() {
         autonomousCommand = (Command) chooser.getSelected();
         
@@ -123,15 +129,28 @@ public class Robot extends IterativeRobot {
         if (autonomousCommand != null) autonomousCommand.start();
     }
     	*/
-    /**
-     * This function is called periodically during autonomous
-     */
+    
     }
     public void autonomousPeriodic() {
         Scheduler.getInstance().run();
        
-        //Drive forward
-        driveMotors(1,0);
+        cycleCounter++;
+
+        if (cycleCounter < 100) {
+        	driveMotors(1,0);
+        }
+        else if (cycleCounter < 200) {
+        	driveMotors(0,0);
+        }
+        else if (cycleCounter < 300) {
+        	driveMotors(1,0);
+        }
+        else if (cycleCounter < 400) {
+        	driveMotors(0,0);
+        }
+        else if (cycleCounter < 500) {
+        	driveMotors(1,0);
+        }
     }
 
     public void teleopInit() {
@@ -146,20 +165,21 @@ public class Robot extends IterativeRobot {
     public void teleopPeriodic() {
         Scheduler.getInstance().run();
         
-        driveMotors(joyStick.getY(),0);
+        //for driving/tank drive
+        driveMotors(joyStickLeft.getY(),joyStickRight.getY());
         
-         buttonValue = xboxController.getRawButton(1);
-         
-         if (buttonValue = true) {
-        	 driveMotors(1,1);
-         }
+        //checking for button values
+        //change when button is ready for use
+        System.out.println(button.get());
+        
+        operatorControl();
     }
     
     
     public void testPeriodic() {
         LiveWindow.run();
         
-        System.out.println("Aaron this isn't my fault");
+        System.out.println("Trolololol");
         
     }
 }
