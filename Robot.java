@@ -99,7 +99,7 @@ public class Robot extends IterativeRobot {
     
     }
     
-    public void operatorControl(){
+    private void operatorControl(){
     	//call if limit switch is used
     	while(limitSwitch.get()) {
     		System.out.println("limit switch");
@@ -171,7 +171,7 @@ public class Robot extends IterativeRobot {
         Scheduler.getInstance().run();
         
         //for driving/tank drive
-        driveMotors(joyStickLeft.getY(),joyStickRight.getY());
+        driveMotors(joyStickLeft.getY(),0);
         
         //checking for button values
         //change when button is ready for use
