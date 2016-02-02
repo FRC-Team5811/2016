@@ -52,7 +52,8 @@ public class Robot extends IterativeRobot {
     //Button boolean
     boolean buttonValue;
     
-    
+    //power distribution panel
+    PowerDistributionPanel power = new PowerDistributionPanel();
     /**
      * This function is run when the robot is first started up and should be
      * used for any initialization code.
@@ -70,7 +71,7 @@ public class Robot extends IterativeRobot {
         //chooser.addDefault("Default Auto", new ExampleCommand());
 //        chooser.addObject("My Auto", new MyAutoCommand());
         SmartDashboard.putData("Auto mode", chooser);
-       
+  
         //Motor port init
        frontLeftDriveMotor = new Victor(0);
        frontRightDriveMotor = new Victor(1);
@@ -92,6 +93,10 @@ public class Robot extends IterativeRobot {
        
        //limit switch init
        limitSwitch =  new DigitalInput(1);
+       
+       double current = power.getCurrent(1);
+       System.out.println(current);
+    
     }
     
     public void operatorControl(){
@@ -179,7 +184,6 @@ public class Robot extends IterativeRobot {
     public void testPeriodic() {
         LiveWindow.run();
         
-        System.out.println("Trolololol");
         
     }
 }
