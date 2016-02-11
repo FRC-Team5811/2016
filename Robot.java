@@ -28,13 +28,17 @@ public class Robot extends IterativeRobot {
 
     Joystick joyStickLeft;
     Joystick joyStickRight;
+    Joystick xbox;
     
     JoystickButton button;
+    JoystickButton triggerRight;
+    JoystickButton triggerLeft;
     
     Victor frontLeftDriveMotor;
     Victor frontRightDriveMotor;
     Victor backLeftDriveMotor;
     Victor backRightDriveMotor;
+    Victor intake;
     
     int cycleCounter;
     
@@ -68,6 +72,10 @@ public class Robot extends IterativeRobot {
     	backRightDriveMotor.set(speedRightDM);
     }
     
+    private void IntakeOnOff(double val){
+    	intake.set(val);
+    }
+    
     public void robotInit() {
 		//oi = new OI();
         chooser = new SendableChooser();
@@ -81,10 +89,16 @@ public class Robot extends IterativeRobot {
        backLeftDriveMotor = new Victor(1); 
        backRightDriveMotor = new Victor(3);
        
+       intake = new Victor(4);
+       
        joyStickLeft = new Joystick(0);
        joyStickRight = new Joystick(1);
+       xbox = new Joystick(2);
        
        button = new JoystickButton(joyStickLeft, 1);
+       triggerRight = new JoystickButton(xbox, 8);
+       triggerLeft = new JoystickButton(xbox, 6);
+
        
        cylinder = new DoubleSolenoid(0,1);
        
@@ -105,7 +119,7 @@ public class Robot extends IterativeRobot {
        System.out.println(current);
     
     }
-    
+   
     private void operatorControl(){
     	//call if limit switch is used
     	/*while(limitSwitch.get()) {
@@ -191,6 +205,14 @@ public class Robot extends IterativeRobot {
         	cylinder.set(DoubleSolenoid.Value.kForward);
         }else{
         	cylinder.set(DoubleSolenoid.Value.kReverse);
+        }
+        
+        if (triggerRight.get()){
+        	IntakeOnOff(-1);
+        }
+        
+        if (triggerLeft.get()){
+        	IntakeOnOff(1);
         }
         
         operatorControl();
