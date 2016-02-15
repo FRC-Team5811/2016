@@ -5,7 +5,7 @@ package org.usfirst.frc.team5811.robot;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
-import org.usfirst.frc.team5811.robot.commands.ExampleCommand;
+//import org.usfirst.frc.team5811.robot.commands.ExampleCommand;
 import org.usfirst.frc.team5811.robot.subsystems.ExampleSubsystem;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -95,7 +95,7 @@ public class Robot extends IterativeRobot {
        joyStickRight = new Joystick(1);
        xbox = new Joystick(2);
        
-       button = new JoystickButton(joyStickLeft, 1);
+       button = new JoystickButton(xbox, 1);
        triggerRight = new JoystickButton(xbox, 8);
        triggerLeft = new JoystickButton(xbox, 6);
 
@@ -181,10 +181,6 @@ public class Robot extends IterativeRobot {
     }
 
     public void teleopInit() {
-		// This makes sure that the autonomous stops running when
-        // teleop starts running. If you want the autonomous to 
-        // continue until interrupted by another command, remove
-        // this line or comment it out.
     	cylinder.set(DoubleSolenoid.Value.kReverse);
         if (autonomousCommand != null) autonomousCommand.cancel();
         compressor.setClosedLoopControl(true);
