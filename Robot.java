@@ -1,7 +1,6 @@
 package org.usfirst.frc.team5811.robot;
 
 
-
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
@@ -56,7 +55,8 @@ public class Robot extends IterativeRobot {
     DigitalInput limitSwitch;
     
     //Button boolean
-    boolean buttonValue;
+    boolean state;
+    boolean previousState;
     
     //power distribution panel
     PowerDistributionPanel power = new PowerDistributionPanel();
@@ -184,6 +184,9 @@ public class Robot extends IterativeRobot {
     	cylinder.set(DoubleSolenoid.Value.kReverse);
         if (autonomousCommand != null) autonomousCommand.cancel();
         compressor.setClosedLoopControl(true);
+        
+        state = false;
+        previousState = false;
     }
     	
     public void teleopPeriodic() {
@@ -197,11 +200,12 @@ public class Robot extends IterativeRobot {
         //checking for button values
         //change when button is ready for use
         //System.out.println(button.get());
-        if(button.get()){
-        	cylinder.set(DoubleSolenoid.Value.kForward);
-        }else{
-        	cylinder.set(DoubleSolenoid.Value.kReverse);
-        }
+        if(button.get() != previousState) state = !state;
+        
+        if(state) cylinder.set(DoubleSolenoid.Value.kForward);
+        else cylinder.set(DoubleSolenoid.Value.kReverse);
+        
+        
         
         if (triggerRight.get()){
         	IntakeOnOff(-1);
