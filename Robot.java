@@ -1,6 +1,4 @@
 package org.usfirst.frc.team5811.robot;
-
-
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
@@ -10,13 +8,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.buttons.JoystickButton; 
-/**
- * The VM is configured to automatically run this class, and to call the
- * functions corresponding to each mode, as described in the IterativeRobot
- * documentation. If you change the name of this class or the package after
- * creating this project, you must also update the manifest file in the resource
- * directory.
- */
+
 public class Robot extends IterativeRobot {
 
 	public static final ExampleSubsystem exampleSubsystem = new ExampleSubsystem();
@@ -60,10 +52,7 @@ public class Robot extends IterativeRobot {
     
     //power distribution panel
     PowerDistributionPanel power = new PowerDistributionPanel();
-    /**
-     * This function is run when the robot is first started up and should be
-     * used for any initialization code.
-     */
+    
     private void driveMotors(double speedLeftDM, double speedRightDM) {
     	System.out.println("Command: " + speedLeftDM);
     	frontLeftDriveMotor.set(speedLeftDM);
@@ -139,7 +128,7 @@ public class Robot extends IterativeRobot {
     public void autonomousInit() {
         autonomousCommand = (Command) chooser.getSelected();
         
-        //driveMotors(0,0);
+        driveMotors(0,0);
 		/* String autoSelected = SmartDashboard.getString("Auto Selector", "Default");
 		switch(autoSelected) {
 		case "My Auto":
@@ -162,22 +151,9 @@ public class Robot extends IterativeRobot {
        
         cycleCounter++;
 
-        //driveMotors(cycleCounter/500,0);
-        /*if (cycleCounter < 100) {
-        	driveMotors(.5,0);
+        if (cycleCounter < 50) {
+        	driveMotors(1,0);
         }
-        else if (cycleCounter < 200) {
-        	driveMotors(0,0);
-        }
-        else if (cycleCounter < 300) {
-        	driveMotors(-.5,0);
-        }
-        else if (cycleCounter < 400) {
-        	driveMotors(0,0);
-        }
-        else if (cycleCounter < 500) {
-        	driveMotors(.5,0);
-        }*/
     }
 
     public void teleopInit() {
