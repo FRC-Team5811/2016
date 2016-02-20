@@ -1,4 +1,7 @@
 package org.usfirst.frc.team5811.robot;
+
+
+
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
@@ -8,7 +11,13 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.buttons.JoystickButton; 
-
+/**
+ * The VM is configured to automatically run this class, and to call the
+ * functions corresponding to each mode, as described in the IterativeRobot
+ * documentation. If you change the name of this class or the package after
+ * creating this project, you must also update the manifest file in the resource
+ * directory.
+ */
 public class Robot extends IterativeRobot {
 
 	public static final ExampleSubsystem exampleSubsystem = new ExampleSubsystem();
@@ -21,9 +30,11 @@ public class Robot extends IterativeRobot {
     Joystick joyStickRight;
     Joystick xbox;
     
-    JoystickButton button;
-    JoystickButton triggerRight;
-    JoystickButton triggerLeft;
+    JoystickButton buttonA;
+    JoystickButton buttonY;
+    JoystickButton buttonB;
+    JoystickButton bumperRight;
+    JoystickButton bumperLeft;
     
     Victor frontLeftDriveMotor;
     Victor frontRightDriveMotor;
@@ -36,6 +47,11 @@ public class Robot extends IterativeRobot {
     //Global Speed Values
     double leftSpeed;
     double rightSpeed;
+    
+    double throttleGain;
+    double turningGain;
+    
+    double current;
     
     //A cylinder
     DoubleSolenoid cylinder;
@@ -53,12 +69,26 @@ public class Robot extends IterativeRobot {
     //power distribution panel
     PowerDistributionPanel power = new PowerDistributionPanel();
     
+    //For the pneumatic
+    double dpad;
+    /**
+     * This function is run when the robot is first started up and should be
+     * used for any initialization code.
+     */
     private void driveMotors(double speedLeftDM, double speedRightDM) {
     	System.out.println("Command: " + speedLeftDM);
     	frontLeftDriveMotor.set(speedLeftDM);
     	frontRightDriveMotor.set(speedRightDM);
     	backLeftDriveMotor.set(speedLeftDM);
     	backRightDriveMotor.set(speedRightDM);
+    }
+    
+    private void arcadeDrive(double throttle, double turn){
+    	leftSpeed = throttle * throttleGain + turn * turningGain;
+    	rightSpeed = throttle * throttleGain - turn * turningGain;
+    	
+    	driveMotors(leftSpeed, rightSpeed);
+    	
     }
     
     private void IntakeOnOff(double val){
@@ -84,27 +114,31 @@ public class Robot extends IterativeRobot {
        joyStickRight = new Joystick(1);
        xbox = new Joystick(2);
        
-       button = new JoystickButton(xbox, 1);
-       triggerRight = new JoystickButton(xbox, 8);
-       triggerLeft = new JoystickButton(xbox, 6);
-
+       
+       buttonA = new JoystickButton(xbox, 1);
+       buttonY = new JoystickButton(xbox, 4);
+       buttonB = new JoystickButton(xbox, 2);
+       bumperRight = new JoystickButton(xbox, 6);
+       bumperLeft = new JoystickButton(xbox, 5);
        
        cylinder = new DoubleSolenoid(0,1);
        
-       
        //set cycle counter
        cycleCounter = 0;
-       
+          
        //compressor port init
        compressor = new Compressor(0);
        compressor.setClosedLoopControl(false);
+       
+       throttleGain = 1;
+       turningGain = 1;
        
        
        
        //limit switch init
        limitSwitch =  new DigitalInput(1);
        
-       double current = power.getCurrent(1);
+       current = power.getCurrent(15);
        System.out.println(current);
     
     }
@@ -128,7 +162,7 @@ public class Robot extends IterativeRobot {
     public void autonomousInit() {
         autonomousCommand = (Command) chooser.getSelected();
         
-        driveMotors(0,0);
+        //driveMotors(0,0);
 		/* String autoSelected = SmartDashboard.getString("Auto Selector", "Default");
 		switch(autoSelected) {
 		case "My Auto":
@@ -144,6 +178,7 @@ public class Robot extends IterativeRobot {
         if (autonomousCommand != null) autonomousCommand.start();
     }
     	*/
+        driveMotors(0, 0);
     
     }
     public void autonomousPeriodic() {
@@ -151,9 +186,25 @@ public class Robot extends IterativeRobot {
        
         cycleCounter++;
 
-        if (cycleCounter < 50) {
-        	driveMotors(1,0);
+        if (cycleCounter < 25) driveMotors(-1, 1);
+        if (cycleCounter > 25) driveMotors(0, 0);
+        
+        //driveMotors(cycleCounter/500,0);
+        /*if (cycleCounter < 100) {
+        	driveMotors(.5,0);
         }
+        else if (cycleCounter < 200) {
+        	driveMotors(0,0);
+        }
+        else if (cycleCounter < 300) {
+        	driveMotors(-.5,0);
+        }
+        else if (cycleCounter < 400) {
+        	driveMotors(0,0);
+        }
+        else if (cycleCounter < 500) {
+        	driveMotors(.5,0);
+        }*/
     }
 
     public void teleopInit() {
@@ -166,33 +217,57 @@ public class Robot extends IterativeRobot {
     }
     	
     public void teleopPeriodic() {
-        System.out.println("Before: " + frontLeftDriveMotor.get());
+        //System.out.println("Before: " + frontLeftDriveMotor.get());
         Scheduler.getInstance().run();
         
+        arcadeDrive(joyStickRight.getX(),joyStickLeft.getY());
+        
         //for driving/tank drive
-        driveMotors(joyStickLeft.getY(),-1*joyStickRight.getY());
-        System.out.println("After: " + frontLeftDriveMotor.get());
+        //driveMotors(joyStickLeft.getY()/1.2,-1*joyStickRight.getY()/1.2);
+        //System.out.println("After: " + frontLeftDriveMotor.get());
         
         //checking for button values
         //change when button is ready for use
         //System.out.println(button.get());
-        if(button.get() != previousState) state = !state;
+        /*if(buttonA.get() != previousState) {
+        	state = !state;
+        	previousState = state;
+        }*/
         
-        if(state) cylinder.set(DoubleSolenoid.Value.kForward);
-        else cylinder.set(DoubleSolenoid.Value.kReverse);
+        System.out.println(xbox.getPOV(0));
+        
+        if(buttonY.get()) cylinder.set(DoubleSolenoid.Value.kForward);
+        if(buttonA.get()) cylinder.set(DoubleSolenoid.Value.kReverse);
+        
+        int direction = xbox.getPOV(0);
+        
+        if (direction != -1)
+        	if (direction == 0) IntakeOnOff(-1);
+        	else if (direction == 180) IntakeOnOff(1);
+        	else IntakeOnOff(0);
+        
+        /*if(xbox.getPOV(0)==90 || xbox.getPOV(0)==270) IntakeOnOff(0);
+        else if(xbox.getPOV(0)==0) IntakeOnOff(-1);
+        else if(xbox.getPOV(0)==180) IntakeOnOff(1);*/
         
         
-        
-        if (triggerRight.get()){
+        /*if (buttonA.get()){
         	IntakeOnOff(-1);
         }
-        
-        if (triggerLeft.get()){
+        if (buttonY.get()){
         	IntakeOnOff(1);
         }
+        if(!buttonA.get() && !buttonY.get()){
+        	IntakeOnOff(0);
+        }*/
+        
+        
         
         operatorControl();
-        System.out.println("After 2: " + frontLeftDriveMotor.get());
+        //System.out.println("After 2: " + frontLeftDriveMotor.get());
+         
+        System.out.println(current);
+        current = power.getCurrent(15);
     }
     
     
