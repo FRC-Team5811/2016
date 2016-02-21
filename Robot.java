@@ -5,12 +5,13 @@ package org.usfirst.frc.team5811.robot;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
-//import org.usfirst.frc.team5811.robot.commands.ExampleCommand;
+import org.usfirst.frc.team5811.robot.commands.ExampleCommand;
 import org.usfirst.frc.team5811.robot.subsystems.ExampleSubsystem;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.buttons.JoystickButton; 
+
 /**
  * The VM is configured to automatically run this class, and to call the
  * functions corresponding to each mode, as described in the IterativeRobot
@@ -21,10 +22,10 @@ import edu.wpi.first.wpilibj.buttons.JoystickButton;
 public class Robot extends IterativeRobot {
 
 	public static final ExampleSubsystem exampleSubsystem = new ExampleSubsystem();
-	//public static OI oi;
+	public static OI oi;
 
     Command autonomousCommand;
-    SendableChooser chooser;
+    SendableChooser chooser = new SendableChooser();
 
     Joystick joyStickLeft;
     Joystick joyStickRight;
@@ -42,6 +43,9 @@ public class Robot extends IterativeRobot {
     Victor backRightDriveMotor;
     Victor intake;
     
+    double autoSelecter;
+    boolean releaseToggle;
+        
     int cycleCounter;
     
     //Global Speed Values
@@ -61,7 +65,7 @@ public class Robot extends IterativeRobot {
     
     //Limit Switch
     DigitalInput limitSwitch;
-    
+       
     //Button boolean
     boolean state;
     boolean previousState;
@@ -96,11 +100,13 @@ public class Robot extends IterativeRobot {
     }
     
     public void robotInit() {
-		//oi = new OI();
+		oi = new OI();
         chooser = new SendableChooser();
-        //chooser.addDefault("Default Auto", new ExampleCommand());
-//        chooser.addObject("My Auto", new MyAutoCommand());
+        chooser.addDefault("Default Auto", new ExampleCommand());
+        //chooser.addObject("My Auto", new MyAutoCommand());
+        chooser.addObject("My Auto", "My Auto");
         SmartDashboard.putData("Auto mode", chooser);
+        System.out.println(SmartDashboard.getBoolean("DB/Button 0", false));
   
         //Motor port init
        frontLeftDriveMotor = new Victor(0);
@@ -131,7 +137,7 @@ public class Robot extends IterativeRobot {
        compressor.setClosedLoopControl(false);
        
        throttleGain = 1;
-       turningGain = 1;
+       turningGain = .8;
        
        
        
@@ -161,12 +167,18 @@ public class Robot extends IterativeRobot {
 	
     public void autonomousInit() {
         autonomousCommand = (Command) chooser.getSelected();
+        cycleCounter = 0;
+        autoSelecter = SmartDashboard.getNumber("DB/Slider 0", 0.0);
+        releaseToggle = SmartDashboard.getBoolean("DB/Button 0", false);
+        System.out.println(autoSelecter);
+        System.out.println(releaseToggle);
+        //if(autoSelecter == 0) autoRoutine=0;
         
         //driveMotors(0,0);
-		/* String autoSelected = SmartDashboard.getString("Auto Selector", "Default");
+		 String autoSelected = SmartDashboard.getString("Auto Selector", "Default");
 		switch(autoSelected) {
 		case "My Auto":
-			autonomousCommand = new Command();
+			autonomousCommand = new ExampleCommand();
 			break;
 		case "Default Auto":
 		default:
@@ -176,18 +188,63 @@ public class Robot extends IterativeRobot {
     	
     	// schedule the autonomous command (example)
         if (autonomousCommand != null) autonomousCommand.start();
+        driveMotors(0,0);
     }
-    	*/
-        driveMotors(0, 0);
+    	
+        
     
-    }
+    
     public void autonomousPeriodic() {
         Scheduler.getInstance().run();
        
         cycleCounter++;
-
-        if (cycleCounter < 25) driveMotors(-1, 1);
+        
+        if(autoSelecter == 0){       // REACH
+        	if(cycleCounter < 250) driveMotors(-0.3, 0.3);
+        	else driveMotors(0,0);
+        }else if(autoSelecter == 1){ // LOW BAR
+        	cylinder.set(DoubleSolenoid.Value.kForward);
+        	if(cycleCounter < 100) driveMotors(-0.0, 0.0);
+        	else if(cycleCounter < 250) driveMotors(-0.4, 0.4);
+        	else driveMotors(0,0);
+        	if(releaseToggle){
+        		//if(cycleCounter > 450) cylinder.set(DoubleSolenoid.Value.kReverse);
+        		if(cycleCounter > 550 && cycleCounter < 600) IntakeOnOff(-1);
+        		if(cycleCounter >= 600) IntakeOnOff(0);
+        	}
+        }else if(autoSelecter == 2){ // ROUGH TERRAIN
+        	if(cycleCounter < 50) driveMotors(-0.3, 0.3);
+        	else if(cycleCounter < 125) driveMotors(-0.7, 0.7);
+        	else driveMotors(0,0);
+        	if(releaseToggle){
+        		if(cycleCounter > 450) cylinder.set(DoubleSolenoid.Value.kReverse);
+        		if(cycleCounter > 550 && cycleCounter < 600) IntakeOnOff(-1);
+        		if(cycleCounter >= 600) IntakeOnOff(0);
+        	}
+        }else if(autoSelecter == 3){ // ROCKWALL
+        	
+        	if(cycleCounter < 50) driveMotors(-0.3, 0.3);
+        	else if(cycleCounter < 135) driveMotors(-0.8, 0.8);
+        	else driveMotors(0,0);
+        	//if(cycleCounter < 150) driveMotors(-0.3, 0.3);
+        	//else if(cycleCounter < 450) driveMotors(-0.8, 0.8);
+        	//else if(cycleCounter < 600) cylinder.set(DoubleSolenoid.Value.kReverse);
+        	//else if(cycleCounter < )
+            // driveMotors(0,0);
+        }else if(autoSelecter == 4){ // MOAT
+        	if(cycleCounter < 50) driveMotors(-0.3, 0.3);
+        	else if(cycleCounter < 125) driveMotors(-0.7, 0.7);
+        	else driveMotors(0,0);
+        }else if(autoSelecter == 5){ // RAMPARTS
+        	if(cycleCounter < 25) driveMotors(-0.4, 0.4);     //Drive Forward Slow
+        	else if(cycleCounter < 75) driveMotors(-0.7, 0.7); //Drive Forward Fast
+        	else if(cycleCounter < 90) driveMotors(-1, 0.2); //Turn to the left
+        	else if(cycleCounter < 125) driveMotors(-0.7, 0.7); //Drive Forward Fast
+        	else driveMotors(0,0);                             //Stop
+        }
+        /*if (cycleCounter < 25) driveMotors(-1, 1);
         if (cycleCounter > 25) driveMotors(0, 0);
+        */
         
         //driveMotors(cycleCounter/500,0);
         /*if (cycleCounter < 100) {
